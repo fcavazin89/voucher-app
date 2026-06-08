@@ -1,0 +1,63 @@
+# ==============================================
+# Netlify Deploy Config — Voucher Social PWA
+# Next.js 16 via @netlify/plugin-nextjs
+# ==============================================
+
+[build]
+  command    = "pnpm install --frozen-lockfile && pnpm build"
+  publish    = ".next"
+
+[build.environment]
+  NODE_VERSION    = "20"
+  PNPM_VERSION    = "9.15.0"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Plugin oficial Next.js da Netlify (SSR + API routes + Image Optimization)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ── Headers de segurança e PWA ──────────────────────────────────────────────
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options           = "DENY"
+    X-Content-Type-Options    = "nosniff"
+    X-XSS-Protection          = "1; mode=block"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    Permissions-Policy        = "camera=(self), microphone=(), geolocation=(self)"
+
+# Service Worker — nunca cacheado pelo browser
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Workbox runtime
+[[headers]]
+  for = "/workbox-*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Manifest PWA
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type  = "application/manifest+json"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Ícones — cache longo (imutáveis)
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ── Redirects ───────────────────────────────────────────────────────────────
+
+# SPA fallback — necessário para rotas do Next.js em modo estático
+# O plugin nextjs já trata SSR, mas garante fallback para client navigation
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+  force  = false
