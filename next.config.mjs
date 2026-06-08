@@ -21,7 +21,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Turbopack config
+  // PWA plugin usa webpack — necessário para evitar erro do Next.js 16
   turbopack: {},
   async headers() {
     return [
